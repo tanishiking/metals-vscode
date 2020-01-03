@@ -67,6 +67,7 @@ import {
   DecorationTypeDidChange,
   DecorationsRangesDidChange
 } from "./decoration-protocol";
+import { ScalaDocCompletionProvider } from "./scalaDocCompletions";
 
 const outputChannel = window.createOutputChannel("Metals");
 const openSettingsAction = "Open settings";
@@ -382,6 +383,12 @@ function launchMetals(
     languages.registerCodeLensProvider(
       { scheme: "file", language: "scala" },
       codeLensRefresher
+    );
+
+    languages.registerCompletionItemProvider(
+      { scheme: "file", language: "scala" },
+      new ScalaDocCompletionProvider(client),
+      "*"
     );
 
     // Handle the metals/executeClientCommand extension notification.
@@ -843,22 +850,18 @@ function migrateStringSettingToArray(id: string): void {
     .inspect<string | string[]>(id)!;
 
   if (typeof setting.globalValue === "string") {
-    workspace
-      .getConfiguration("metals")
-      .update(
-        id,
-        setting.globalValue.split(" ").filter(e => e.length > 0),
-        ConfigurationTarget.Global
-      );
+    workspace.getConfiguration("metals").update(
+      id,
+      setting.globalValue.split(" ").filter(e => e.length > 0),
+      ConfigurationTarget.Global
+    );
   }
 
   if (typeof setting.workspaceValue === "string") {
-    workspace
-      .getConfiguration("metals")
-      .update(
-        id,
-        setting.workspaceValue.split(" ").filter(e => e.length > 0),
-        ConfigurationTarget.Workspace
-      );
+    workspace.getConfiguration("metals").update(
+      id,
+      setting.workspaceValue.split(" ").filter(e => e.length > 0),
+      ConfigurationTarget.Workspace
+    );
   }
 }
